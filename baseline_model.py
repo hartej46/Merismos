@@ -126,3 +126,17 @@ class GPT(nn.Module):
             idx = torch.cat((idx, idx_next), dim=1)
 
         return idx
+
+
+model_0 = GPT()
+model_0.to('cuda')
+
+from pathlib import Path
+
+MODEL_PATH = Path("models")
+MODEL_PATH.mkdir(parents = True,exist_ok = True)
+
+MODEL_NAME = "TinyShakespeare_GPT_baseline"
+MODEL_SAVE_PATH = MODEL_PATH / MODEL_NAME
+
+torch.save(obj = model_0.state_dict(),f =MODEL_SAVE_PATH)
