@@ -28,6 +28,7 @@ urllib.request.urlretrieve(shakespeare_url, "./dataset/input.txt")
 print("Tiny Shakespeare Downloaded")
 
 arXiv_oyput_dir = Path("./dataset/arxiv_csv")
+arXiv_oyput_dir.mkdir(parents=True, exist_ok=True)
 print("Downloadiing arXiv data.")
 ds_arxiv = load_dataset(
     "allenai/sciq",
