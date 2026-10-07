@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-
+from deviceConfig import device
 n_embd = 384
 block_size = 256
 dropout = 0.2
@@ -129,7 +129,7 @@ class GPT(nn.Module):
 
 
 model_0 = GPT()
-model_0.to('cuda')
+model_0.to(device)
 
 from pathlib import Path
 
