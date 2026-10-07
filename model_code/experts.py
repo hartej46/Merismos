@@ -1,3 +1,4 @@
+from deviceConfig import device
 import torch
 from torch import nn
 
@@ -19,7 +20,7 @@ class expert(nn.Module):
 
 
 model_0 = expert(n_embd=768)
-model_0.to('cuda')
+model_0.to(device)
 
 from pathlib import Path
 
