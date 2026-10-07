@@ -26,3 +26,14 @@ print("Downloading Tiny Shakespeare dataset")
 shakespeare_url = "https://raw.githubusercontent.com/yay1503/GPT-2/refs/heads/main/input.txt"
 urllib.request.urlretrieve(shakespeare_url, "./dataset/input.txt")
 print("Tiny Shakespeare Downloaded")
+
+arXiv_oyput_dir = Path("./dataset/arxiv_csv")
+print("Downloadiing arXiv data.")
+ds_arxiv = load_dataset(
+    "allenai/sciq",
+    split="train",
+    cache_dir=str(cache_dir)
+)
+print(f"Loaded {len(ds_arxiv)} rows. Converting to csv...")
+ds_arxiv.to_csv( arXiv_oyput_dir / "arxiv.csv")
+print("ArXiv dataset downloaded")
