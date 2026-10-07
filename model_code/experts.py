@@ -1,3 +1,5 @@
+from torch import autograd
+from torch import device
 import torch
 from torch import nn
 
@@ -19,7 +21,8 @@ class expert(nn.Module):
 
 
 model_0 = expert(n_embd=768)
-model_0.to('cuda')
+device = 'mps' if torch.backends.mps.is_available() else 'cuda' if torch.cuda.is_available() else 'cpu'
+model_0.to(device)
 
 from pathlib import Path
 
