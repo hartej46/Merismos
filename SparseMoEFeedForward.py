@@ -2,6 +2,7 @@ import torch
 from torch import nn
 from model_code.router import Router
 from model_code.experts import expert
+from deviceConfig import device
 
 class sparseMoEFeedForward(nn.Module):
 
@@ -26,13 +27,29 @@ class sparseMoEFeedForward(nn.Module):
 
         final_output = torch.zeros_like(x) # (B*T, C)
 
+        capacity_factor = 1.25
+        num_experts = len(self.experts)
+        capacity = int((B * T / num_experts) * capacity_factor)
+
+
+
         for i, current_expert in enumerate(self.experts):
 
             mask = (highest_expert_indices == i)
-            
+
+            idx = mask.nonzero().squeeze(-1)
+            num_token = idx.shape[0]
+            print(idx)
             # Extract only the specific tokens for this expert
-            tokens_for_expert = x[mask]
-            
+            tokens_for_expert = x[idx]
+
+            if num_token > capacity:
+                tokens_for_expert = highest_expert_value[idx]
+                
+                values, top_idx = torch.topk(tokens_for_expert, capacity)
+
+                idx = idx[top_idx]
+                
             # If no tokens chose this expert, skip to the next one
             if tokens_for_expert.shape[0] == 0:
                 continue
@@ -48,3 +65,10 @@ class sparseMoEFeedForward(nn.Module):
             final_output[mask] = weighted_out
 
         return final_output.reshape(B, T, C)
+
+
+if __name__ == "__main__":
+    dummy_x = torch.randn(2,8,768).to(device)
+    model = sparseMoEFeedForward().to(device = device)
+
+    print(model(dummy_x).shape)
