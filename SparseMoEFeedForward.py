@@ -1,5 +1,5 @@
 import torch
-from torch import nn
+from torch import mean, nn
 from model_code.router import Router
 from model_code.experts import expert
 from deviceConfig import device
@@ -31,7 +31,22 @@ class sparseMoEFeedForward(nn.Module):
         num_experts = len(self.experts)
         capacity = int((B * T / num_experts) * capacity_factor)
 
+        # calculate the total number of tokens
+        total_tokens = B * T
 
+        # Calculating the mean probability for each expert
+        mean_prob = torch.mean(logits, dim=0)  # (num_experts,)
+
+        tokens_per_expert = torch.bincount(highest_expert_indices, minlength=num_experts)  # (num_experts,)
+
+        # Calculate the precentage of tokens assigned to each expert
+
+        tokens_percentage = tokens_per_expert.float() / total_tokens  # (num_experts,)
+
+        # Calculating the load-balancing loss
+
+        load_balancing_loss = num_experts * torch.sum(mean * tokens_percentage)  # scalar
+        
 
         for i, current_expert in enumerate(self.experts):
 
@@ -42,7 +57,7 @@ class sparseMoEFeedForward(nn.Module):
             print(idx)
         
             if num_token > capacity:
-                gate_values = highest_expert_value[idx]
+                gate_values = highest_expert_value[idx] # Changed the variable name here as tokens_for_expert is already used before
                 
                 _, top_idx = torch.topk(gate_values, capacity)
 
@@ -65,7 +80,7 @@ class sparseMoEFeedForward(nn.Module):
             # Scatter them back into the blank canvas
             final_output[idx] = weighted_out
 
-        return final_output.reshape(B, T, C)
+        return final_output.reshape(B, T, C) , load_balancing_loss
 
 
 if __name__ == "__main__":
