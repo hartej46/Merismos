@@ -40,15 +40,16 @@ class sparseMoEFeedForward(nn.Module):
             idx = mask.nonzero(as_tuple = False).squeeze(-1)
             num_token = idx.shape[0]
             print(idx)
-            # Extract only the specific tokens for this expert
-            tokens_for_expert = x[idx]
-
+        
             if num_token > capacity:
-                tokens_for_expert = highest_expert_value[idx]
+                gate_values = highest_expert_value[idx]
                 
-                values, top_idx = torch.topk(tokens_for_expert, capacity)
+                _, top_idx = torch.topk(gate_values, capacity)
 
                 idx = idx[top_idx]
+
+            # Extract only the specific tokens for this expert
+            tokens_for_expert = x[idx]
                 
             # If no tokens chose this expert, skip to the next one
             if tokens_for_expert.shape[0] == 0:
