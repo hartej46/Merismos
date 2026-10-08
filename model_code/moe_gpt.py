@@ -58,7 +58,7 @@ class Block_MoE(nn.Module):
         super().__init__()
 
         self.sa = MultiHeadAttention(num_heads=4, head_size=n_embd//4)
-        self.ffwd = SparseMoEFeedForward(n_embd)
+        self.ffwd = sparseMoEFeedForward(n_embd)
         self.ln1 = nn.LayerNorm(n_embd)
         self.ln2 = nn.LayerNorm(n_embd)
 
