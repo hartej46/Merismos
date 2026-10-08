@@ -45,13 +45,13 @@ def build_dataset():
 
     # 2. Extract ArXiv text
     # NOTE: Change 'abstract' to the exact column header used in your ArXiv CSVs
-    arxiv_docs = extract_text_from_csv_dir(ARXIV_DIR, text_column="abstract")
+    arxiv_docs = extract_text_from_csv_dir(ARXIV_DIR, text_column="question")
     all_documents.extend(arxiv_docs)
     print(f"Loaded {len(arxiv_docs)} ArXiv documents.")
 
     # 3. Extract Source Code text
     # NOTE: Change 'content' to the exact column header used in your Code CSVs
-    code_docs = extract_text_from_csv_dir(CODE_DIR, text_column="content")
+    code_docs = extract_text_from_csv_dir(CODE_DIR, text_column="text")
     all_documents.extend(code_docs)
     print(f"Loaded {len(code_docs)} Code documents.")
 
