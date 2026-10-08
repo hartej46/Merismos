@@ -1,4 +1,7 @@
 import torch
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from torch import nn
 from deviceConfig import device
 n_embd = 384
@@ -136,7 +139,7 @@ from pathlib import Path
 MODEL_PATH = Path("models")
 MODEL_PATH.mkdir(parents = True,exist_ok = True)
 
-MODEL_NAME = "TinyShakespeare_GPT_baseline"
+MODEL_NAME = "baseline_model"
 MODEL_SAVE_PATH = MODEL_PATH / MODEL_NAME
 
 torch.save(obj = model_0.state_dict(),f =MODEL_SAVE_PATH)

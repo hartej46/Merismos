@@ -1,5 +1,8 @@
 import torch
 from torch import nn
+import os
+import sys
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 class Router(nn.Module):
 
