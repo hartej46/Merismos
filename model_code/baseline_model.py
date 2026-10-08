@@ -4,6 +4,8 @@ import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from torch import nn
 from deviceConfig import device
+
+
 n_embd = 384
 block_size = 256
 dropout = 0.2

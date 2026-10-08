@@ -82,9 +82,10 @@ class sparseMoEFeedForward(nn.Module):
 
         return final_output.reshape(B, T, C) , load_balancing_loss
 
+# We do not require this in a model file now as it tested
 
-if __name__ == "__main__":
-    dummy_x = torch.randn(2,8,768).to(device)
-    model = sparseMoEFeedForward().to(device = device)
+# if __name__ == "__main__":
+#     dummy_x = torch.randn(2,8,768).to(device)
+#     model = sparseMoEFeedForward().to(device = device)
 
-    print(model(dummy_x).shape)
+#     print(model(dummy_x).shape)
