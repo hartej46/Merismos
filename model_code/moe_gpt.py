@@ -111,3 +111,13 @@ if __name__ == "__main__":
     model = sparseMoEFeedForward().to(device = device)
 
     # print(model(dummy_x).shape)
+
+    from pathlib import Path
+
+    MODEL_PATH = Path("models")
+    MODEL_PATH.mkdir(parents = True,exist_ok = True)
+
+    MODEL_NAME = "MoE_model"
+    MODEL_SAVE_PATH = MODEL_PATH / MODEL_NAME
+
+    torch.save(obj = model.state_dict(),f =MODEL_SAVE_PATH)
