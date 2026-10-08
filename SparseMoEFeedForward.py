@@ -37,7 +37,7 @@ class sparseMoEFeedForward(nn.Module):
 
             mask = (highest_expert_indices == i)
 
-            idx = mask.nonzero().squeeze(-1)
+            idx = mask.nonzero(as_tuple = False).squeeze(-1)
             num_token = idx.shape[0]
             print(idx)
             # Extract only the specific tokens for this expert
@@ -58,11 +58,11 @@ class sparseMoEFeedForward(nn.Module):
             expert_out = current_expert(tokens_for_expert)
             
             # Multiply by their specific gate values
-            gates = highest_expert_value[mask].unsqueeze(-1)
+            gates = highest_expert_value[idx].unsqueeze(-1)
             weighted_out = expert_out * gates
             
             # Scatter them back into the blank canvas
-            final_output[mask] = weighted_out
+            final_output[idx] = weighted_out
 
         return final_output.reshape(B, T, C)
 
