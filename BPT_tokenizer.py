@@ -1,5 +1,4 @@
-# BPE Tokenizer:
-
+import json
 import regex as re
 
 class MinBPE:
@@ -109,5 +108,36 @@ class MinBPE:
         byte_string = b''.join(byte_segments)
 
         return byte_string.decode("utf-8", errors = "replace")
+
+    def save(self, file_path):
+
+        serializable_merges = {f"{k[0]},{k[1]}": v for k, v in self.merges.items()}
         
+        with open(file_path, "w") as f:
+            json.dump(serializable_merges, f)
+            
+        print(f"Saved {len(self.merges)} merges to {file_path}")
+
+    def load(self, file_path):
+
+        with open(file_path, "r") as f:
+            data = json.load(f)
+            
+        # 1. Reconstruct the merges dictionary with integer tuple keys
+        self.merges = {}
+        for k, v in data.items():
+            p1, p2 = k.split(',')
+            self.merges[(int(p1), int(p2))] = int(v)
+            
+        # 2. Rebuild the base 256-byte vocabulary
+        self.vocab = {i: bytes([i]) for i in range(256)}
+        
+        # 3. Reconstruct the merged vocabulary in the exact order they were created
+        # We sort by the token index (the value in the merges dict) to ensure correct order
+        sorted_merges = sorted(self.merges.items(), key=lambda x: x[1])
+        
+        for pair, idx in sorted_merges:
+            self.vocab[idx] = self.vocab[pair[0]] + self.vocab[pair[1]]
+            
+        print(f"Loaded {len(self.merges)} merges. Total vocabulary size: {len(self.vocab)}")
 
