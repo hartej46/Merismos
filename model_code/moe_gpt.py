@@ -87,7 +87,11 @@ class MoEGPT(nn.Module):
             pos_emb = self.position_embedding_table(torch.arange(T, device=idx.device))
     
             x = tok_emb + pos_emb
-            x,loss = self.blocks(x)
+
+            total_aux_loss = 0.0
+            for block in self.blocks:
+                x, block_loss = block(x)
+                total_aux_loss += block_loss
     
             logits = self.lm_head(x)
     
@@ -102,9 +106,9 @@ class MoEGPT(nn.Module):
                 targets = targets.view(B*T)
                 loss_cross_entropy= nn.functional.cross_entropy(logits, targets)
 
-                total_loss = loss_cross_entropy + loss*alpha
+                loss = loss_cross_entropy + total_aux_loss*alpha
     
-            return logits, total_loss
+            return logits, loss
 
 if __name__ == "__main__":
     # dummy_x = torch.randn(2,8,768).to(device)
