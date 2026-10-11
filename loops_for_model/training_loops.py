@@ -22,7 +22,7 @@ def train_loop(model : nn.Module,
             X = X.to(device)
             y = y.to(device)
 
-            logits,loss = model(X,y)
+            _,loss = model(X,y)
 
             # Gradient clipping is recommended for Transformer/MoE stability
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
