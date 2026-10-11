@@ -1,5 +1,7 @@
 import json
 import regex as re
+from collections import Counter
+from tqdm import trange
 
 class MinBPE:
     def __init__ (self):
@@ -21,7 +23,7 @@ class MinBPE:
         num_merges = vocab_size - 256
         current_idx = 256
 
-        for _ in range(num_merges) :
+        for _ in trange(num_merges) :        # this is optimized way of writing tqdm(range(...))
 
             global_stats = {}
 
@@ -45,17 +47,10 @@ class MinBPE:
 
             current_idx += 1
 
-            print(f"{_}")
+            print(f"Current iteration: {_}")
 
     def get_stats(self, ids) :
-
-        counts = {}
-
-        for pair in zip(ids,ids[1:]):
-
-            counts[pair] = counts.get(pair,0) + 1
-
-        return counts
+        return Counter(zip(ids, ids[1:]))
     
     def merge(self,ids,pair,idx):
 
