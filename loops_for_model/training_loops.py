@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import DataLoader
 from torch import nn
-import tqdm
+from tqdm.auto import tqdm
 
 def train_loop(model : nn.Module, 
                data_loader : DataLoader,
@@ -18,7 +18,7 @@ def train_loop(model : nn.Module,
         model.train()
         training_loss = 0.0
 
-        for X,y in tqdm.auto(data_loader):
+        for X,y in tqdm(data_loader):
 
             X = X.to(device)
             y = y.to(device)
