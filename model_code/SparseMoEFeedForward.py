@@ -9,8 +9,8 @@ class sparseMoEFeedForward(nn.Module):
     def __init__(self):
         super().__init__()
 
-        self.router_1 = Router(n_embd=768, num_experts=4)
-        self.experts = nn.ModuleList([expert(n_embd=768) for _ in range(4)])
+        self.router_1 = Router(n_embd=384, num_experts=4)
+        self.experts = nn.ModuleList([expert(n_embd=384) for _ in range(4)])
 
     def forward(self, x):
 
@@ -45,7 +45,7 @@ class sparseMoEFeedForward(nn.Module):
 
         # Calculating the load-balancing loss
 
-        load_balancing_loss = num_experts * torch.sum(mean * tokens_percentage)  # scalar
+        load_balancing_loss = num_experts * torch.sum(mean_prob * tokens_percentage)  # scalar
         
 
         for i, current_expert in enumerate(self.experts):
@@ -54,7 +54,7 @@ class sparseMoEFeedForward(nn.Module):
 
             idx = mask.nonzero(as_tuple = False).squeeze(-1)
             num_token = idx.shape[0]
-            print(idx)
+            # print(idx)
         
             if num_token > capacity:
                 gate_values = highest_expert_value[idx] # Changed the variable name here as tokens_for_expert is already used before

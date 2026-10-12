@@ -1,7 +1,7 @@
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from SparseMoEFeedForward import sparseMoEFeedForward
+from model_code.SparseMoEFeedForward import sparseMoEFeedForward
 from deviceConfig import device
 import torch
 from torch import nn
@@ -9,7 +9,7 @@ from torch import nn
 n_embd = 384
 block_size = 256
 dropout = 0.2
-vocab_size = 1115394
+vocab_size = 1500
 alpha = 0.01 # Weight for the load balancing loss
 
 # Same as baseline GPT model
@@ -45,10 +45,12 @@ class MultiHeadAttention(nn.Module):
 
         self.heads = nn.ModuleList([Head(head_size) for _ in range(num_heads)])
         self.proj = nn.Linear(n_embd, n_embd)
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
         out = torch.cat([h(x) for h in self.heads], dim=-1)
         out = self.proj(out)
+        out = self.dropout(out)
         return out
 
 # Here we use the SparseMoEFeedForward class instead of the standard FeedForward class
@@ -58,14 +60,15 @@ class Block_MoE(nn.Module):
         super().__init__()
 
         self.sa = MultiHeadAttention(num_heads=4, head_size=n_embd//4)
-        self.ffwd = sparseMoEFeedForward(n_embd)
+        self.ffwd = sparseMoEFeedForward()
         self.ln1 = nn.LayerNorm(n_embd)
         self.ln2 = nn.LayerNorm(n_embd)
+        self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
         x = x + self.sa(self.ln1(x))
         ffn,loss = self.ffwd(self.ln2(x))
-        x = x + ffn
+        x = x + self.dropout(ffn)
 
         return x,loss
 
@@ -78,21 +81,24 @@ class MoEGPT(nn.Module):
         self.position_embedding_table = nn.Embedding(block_size, n_embd)
         self.blocks = nn.ModuleList([Block_MoE(n_embd) for _ in range(4)])
         self.lm_head = nn.Linear(n_embd, vocab_size)
+        self.ln_final = nn.LayerNorm(n_embd)
+        self.emb_dropout = nn.Dropout(dropout)
 
     def forward(self, idx, targets=None):
     
-            B, T = idx.shape
+            B, T  = idx.shape
     
             tok_emb = self.token_embedding_table(idx)
             pos_emb = self.position_embedding_table(torch.arange(T, device=idx.device))
     
-            x = tok_emb + pos_emb
+            x = self.emb_dropout(tok_emb + pos_emb)
 
             total_aux_loss = 0.0
             for block in self.blocks:
                 x, block_loss = block(x)
                 total_aux_loss += block_loss
-    
+
+            x = self.ln_final(x)
             logits = self.lm_head(x)
     
             if targets is None:
@@ -111,10 +117,10 @@ class MoEGPT(nn.Module):
             return logits, loss
 
 if __name__ == "__main__":
-    # dummy_x = torch.randn(2,8,768).to(device)
-    model = sparseMoEFeedForward().to(device = device)
+    # dummy_x = torch.randint(0, vocab_size, (2, 8)).to(device)
+    model = MoEGPT().to(device = device)
 
-    # print(model(dummy_x).shape)
+    # print(model(dummy_x)[0].shape)
 
     from pathlib import Path
 
