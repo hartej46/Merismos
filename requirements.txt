@@ -2,3 +2,4 @@ datasets
 huggingface
 pandas
 torch
+regex
